@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>MINESWEEPER</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="main-container">
+    <div class="title-line">
+        <div class="heading">◈ MINESWEEPER</div>
+        <div class="muted">MODERN DARK GAMING</div>
+    </div>
+
+    <div class="options">
+        <select id="levelSelect" style="flex: 2;" onchange="onLevelChanged()">
+            <option value="Dễ">Dễ</option>
+            <option value="Trung bình">Trung bình</option>
+            <option value="Khó">Khó</option>
+            <option value="Tùy chỉnh">Tùy chỉnh</option>
+        </select>
+        <div id="customInputs" style="display:none; display:flex; gap: 5px;">
+            <input type="number" id="rowsBox" value="9" min="2" max="30" style="width: 80px;" title="Hàng">
+            <input type="number" id="colsBox" value="9" min="2" max="40" style="width: 80px;" title="Cột">
+            <input type="number" id="minesBox" value="10" min="1" max="1000" style="width: 80px;" title="Mìn">
+        </div>
+        <button accent="true" style="flex: 2;" onclick="startNewGame(false)">↻ CHƠI MỚI</button>
+    </div>
+
+    <div class="metrics">
+        <div class="metric-panel">
+            <div class="muted">MÌN CÒN LẠI</div>
+            <div class="metric-value" id="minesLabel">010</div>
+        </div>
+        <div class="metric-panel">
+            <div class="muted">THỜI GIAN</div>
+            <div class="metric-value" id="timeLabel">00:00</div>
+        </div>
+        <div class="metric-panel">
+            <div class="muted">TIẾN ĐỘ</div>
+            <div class="metric-value" id="progressLabel">0%</div>
+        </div>
+    </div>
+
+    <div class="status" id="statusLabel">Nhấn một ô bất kỳ để bắt đầu!</div>
+
+    <div class="board-scroll" id="boardScroll">
+        <div class="board-canvas" id="boardCanvas"></div>
+    </div>
+
+    <div class="actions-bar">
+        <button id="pauseBtn" onclick="togglePause()">Ⅱ TẠM DỪNG</button>
+        <button onclick="useHint()">✦ GỢI Ý (<span id="hintCount">3</span>)</button>
+        <button onclick="showLeaderboard()">🏆 XẾP HẠNG</button>
+        <button onclick="startNewGame(true)">◷ THỬ THÁCH NGÀY</button>
+    </div>
+
+    <div class="bottom-bar">
+        <button id="themeBtn" onclick="toggleTheme()">☼ GIAO DIỆN SÁNG</button>
+        <button onclick="showSettings()">⚙ CÀI ĐẶT</button>
+        <label class="checkbox-label"><input type="checkbox" id="soundBox" onchange="settings.sound=this.checked; persistSettings();"> Âm thanh</label>
+        <label class="checkbox-label"><input type="checkbox" id="animationBox" onchange="settings.animations=this.checked; persistSettings();" checked> Hiệu ứng</label>
+        <div class="muted" style="margin-left: auto;">Trái: mở • Phải: cờ • Double-click: mở quanh</div>
+    </div>
+</div>
+
+<!-- Cài đặt Modal -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+        <h2>⚙ CÁ NHÂN HÓA TRÒ CHƠI</h2>
+        <label class="checkbox-label"><input type="checkbox" id="setLight"> Giao diện sáng</label>
+        <label class="checkbox-label"><input type="checkbox" id="setSound"> Âm thanh</label>
+        <label class="checkbox-label"><input type="checkbox" id="setAnimations" checked> Hoạt ảnh khi mở ô</label>
+        <label class="checkbox-label"><input type="checkbox" id="setEffects3d" checked> Ô nổi 3D nhẹ</label>
+        <label class="checkbox-label"><input type="checkbox" id="setCelebrations" checked> Pháo giấy khi chiến thắng</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span>Kích thước ô</span>
+            <input type="range" id="setSizeSlider" min="28" max="52" value="35" oninput="document.getElementById('setSizeLabel').innerText = this.value + ' px'" style="flex:1;">
+            <span id="setSizeLabel">35 px</span>
+        </div>
+        <div class="muted">Thay đổi kích thước ô sẽ áp dụng ngay, không làm mất ván chơi.</div>
+        <div style="display:flex; gap:10px; justify-content: flex-end;">
+            <button onclick="closeSettings(false)">Hủy</button>
+            <button accent="true" onclick="closeSettings(true)">Đồng ý</button>
+        </div>
+    </div>
+</div>
+
+<!-- Xếp hạng Modal -->
+<div class="modal-overlay" id="leaderboardModal">
+    <div class="modal" style="width: 710px; max-width: 95%;">
+        <h2>🏆 HALL OF FAME</h2>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <span>Cấp độ</span>
+            <select id="lbFilter" onchange="refreshLeaderboard()">
+                <option value="Tất cả">Tất cả</option>
+                <option value="Dễ">Dễ</option>
+                <option value="Trung bình">Trung bình</option>
+                <option value="Khó">Khó</option>
+                <option value="Hằng ngày">Hằng ngày</option>
+            </select>
+        </div>
+        <div id="lbOverview" class="muted"></div>
+        <div style="max-height: 250px; overflow-y: auto;">
+            <table>
+                <thead>
+                    <tr><th>#</th><th>CẤP ĐỘ</th><th>THỜI GIAN</th><th>NGÀY CHƠI</th></tr>
+                </thead>
+                <tbody id="lbTableBody"></tbody>
+            </table>
+        </div>
+        <div class="muted">Kỷ lục chỉ tính các ván thắng không sử dụng gợi ý.</div>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'">ĐÓNG</button>
+    </div>
+</div>
+
+<!-- Custom Game Message Modal -->
+<div class="modal-overlay" id="gameMessageModal">
+    <div class="modal" style="text-align: center; gap: 12px;">
+        <h2 id="modalTitle" style="color: var(--accent);">✨ THÔNG BÁO</h2>
+        <p id="modalBody" style="font-size: 11pt; line-height: 1.6; white-space: pre-line;"></p>
+        <button accent="true" onclick="document.getElementById('gameMessageModal').style.display='none'">TIẾP TỤC</button>
+    </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
