@@ -9,6 +9,9 @@ Trò chơi **Minesweeper** cổ điển được viết lại hoàn toàn bằng
 ## ✨ Tính năng nổi bật
 
 - **Giao diện hiện đại (Modern UI)**: Hỗ trợ chuyển đổi linh hoạt giữa giao diện Tối (Dark Theme) và Sáng (Light Theme).
+- - **Hỗ trợ đa nền tảng (Responsive & Touch)**: 
+  - **Máy tính**: Sử dụng chuột trái (mở ô), chuột phải (cắm cờ), và Double-click (mở nhanh các ô xung quanh khi đã cắm đủ cờ).
+  - **Điện thoại / Thiết bị di động**: Tự động nhận diện thiết bị cảm ứng, cung cấp thanh công cụ chuyển đổi nhanh giữa chế độ **Mở ô** và **Cắm cờ** để thao tác mượt mà trực tiếp bằng tay.
 - **Đa dạng cấp độ**: 
   - **Dễ**: Lưới (10 mìn)
   - **Trung bình**: Lưới (40 mìn)
